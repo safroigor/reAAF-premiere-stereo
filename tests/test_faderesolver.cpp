@@ -107,7 +107,7 @@ TEST_CASE(
 
     auto [len, shape] = resolveFadeIn(&clip, &clip_ti, xFadeMap, &rate);
     REQUIRE(len == Catch::Approx(2.0));
-    REQUIRE(shape == 4); // power/fast-start
+    REQUIRE(shape == 1); // Premiere CURV_PWR / REAPER equal-power
 }
 
 TEST_CASE(

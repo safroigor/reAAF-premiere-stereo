@@ -453,12 +453,12 @@ static int curve_to_shape(const std::string &curve) {
     if ( curve == "CURV_LIN" )
         return 0;
     if ( curve == "CURV_PWR" )
-        return 4;
+        return 1;
     if ( curve == "CURV_LOG" )
         return 3;
     if ( curve == "CURV_BSP" )
         return 5;
-    return 1; // quarter-sine default
+    return 1; // gentle equal-power default
 }
 } // namespace
 

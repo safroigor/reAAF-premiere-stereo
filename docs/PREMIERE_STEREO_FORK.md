@@ -8,11 +8,15 @@ were developed with Igor Safronov.
 
 Private repository: `https://github.com/safroigor/reAAF-premiere-stereo`
 
-Current version: `0.3.7-premiere-stereo.2`
+Current version: `0.3.7-premiere-stereo.3`
 
 Feature branch at initial validation: `agent/premiere-stereo-import`
 
 Initial implementation commit: `d31d96a Support Premiere breakout stereo AAF imports`
+
+Version `.3` corrects Premiere `CURV_PWR` / Constant Power fades. They now use
+REAPER's slight-convex equal-power shape (internal shape index 1), rather than
+the sharp-concave shape that was used previously.
 
 ## Validated source material
 

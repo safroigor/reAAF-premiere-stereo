@@ -141,16 +141,16 @@ TEST_CASE("interpol_to_reaper_shape") {
     SECTION("linear flag -> shape 0") {
         REQUIRE(interpol_to_reaper_shape(AAFI_INTERPOL_LINEAR) == 0);
     }
-    SECTION("power flag -> shape 4 (fast start)") {
-        REQUIRE(interpol_to_reaper_shape(AAFI_INTERPOL_POWER) == 4);
+    SECTION("power flag -> shape 1 (equal power)") {
+        REQUIRE(interpol_to_reaper_shape(AAFI_INTERPOL_POWER) == 1);
     }
-    SECTION("log flag -> shape 3 (slow start)") {
+    SECTION("log flag -> shape 3 (sharp convex)") {
         REQUIRE(interpol_to_reaper_shape(AAFI_INTERPOL_LOG) == 3);
     }
-    SECTION("bspline flag -> shape 5 (bezier)") {
+    SECTION("bspline flag -> shape 5 (slight S-curve)") {
         REQUIRE(interpol_to_reaper_shape(AAFI_INTERPOL_BSPLINE) == 5);
     }
-    SECTION("unknown/zero flags -> shape 1 (quarter-sine default)") {
+    SECTION("unknown/zero flags -> shape 1 (gentle equal-power default)") {
         REQUIRE(interpol_to_reaper_shape(0) == 1);
     }
     SECTION("linear takes priority when multiple flags set") {

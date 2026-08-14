@@ -94,17 +94,20 @@ inline std::string escape_rpp_string(const char *raw) {
 
 
 // Map AAFInterpolation flags to REAPER fade shape index.
-// REAPER: 0=linear, 1=quarter-sine, 2=equal power, 3=slow start, 4=fast start, 5=bezier
+// REAPER: 0=linear, 1=slight convex/equal-power, 2=slight concave,
+//         3=sharp convex, 4=sharp concave, 5=slight S, 6=sharp S.
 [[nodiscard]] inline int interpol_to_reaper_shape(const uint32_t flags) noexcept {
     if ( flags & AAFI_INTERPOL_LINEAR )
         return 0;
     if ( flags & AAFI_INTERPOL_POWER )
-        return 4;
+        // Premiere's Constant Power transition is exported as CURV_PWR.
+        // REAPER shape 1 is explicitly its equal-power crossfade shape.
+        return 1;
     if ( flags & AAFI_INTERPOL_LOG )
         return 3;
     if ( flags & AAFI_INTERPOL_BSPLINE )
         return 5;
-    return 1; // default: quarter-sine
+    return 1; // default: REAPER's gentle equal-power curve
 }
 
 // Strip extension and append "-media" to build the embedded-essence extract dir.
