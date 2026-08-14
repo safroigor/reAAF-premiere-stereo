@@ -44,8 +44,7 @@ struct aafiAudioEssenceFile;
 
 class AafImporter {
   public:
-    AafImporter(IRppSink *sink, const char *filepath, LogBuffer &logBuffer,
-                std::vector<ItemFadeShapes> *deferredFadeShapes = nullptr);
+    AafImporter(IRppSink *sink, const char *filepath, LogBuffer &logBuffer);
 
     int run();
 

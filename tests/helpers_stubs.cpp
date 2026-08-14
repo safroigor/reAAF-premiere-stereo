@@ -12,6 +12,7 @@ void rlog(const char * /*fmt*/, ...) {}
 
 bool ensure_dir(const std::string &path) {
     std::error_code ec;
-    std::filesystem::create_directories(path, ec);
-    return !ec;
+    const auto directory = std::filesystem::u8path(path);
+    std::filesystem::create_directories(directory, ec);
+    return !ec && std::filesystem::is_directory(directory, ec) && !ec;
 }

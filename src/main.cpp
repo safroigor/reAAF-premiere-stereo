@@ -23,7 +23,6 @@
 #include "defines.h"
 #include "helpers.h"
 #include <memory>
-#include <vector>
 // ReSharper disable once CppUnusedIncludeDirective
 #include "version.h"
 #define REAPERAPI_IMPLEMENT
@@ -36,37 +35,10 @@ namespace {
 constexpr unsigned int kCmdId_ZoomProject = 40295;
 // This stuff is needed to zoom to project at end of import
 bool isAafImport = false; // prevent zooming ALL projects. Set in aaf_ImportProject
-std::vector<ItemFadeShapes> pendingFadeShapes;
-
-void ApplyDeferredFadeShapes() {
-    size_t itemIndex = 0;
-    const int trackCount = CountTracks(nullptr);
-    for ( int trackIndex = 0; trackIndex < trackCount; ++trackIndex ) {
-        MediaTrack *track = GetTrack(nullptr, trackIndex);
-        if ( !track )
-            continue;
-        const int itemCount = CountTrackMediaItems(track);
-        for ( int trackItemIndex = 0; trackItemIndex < itemCount; ++trackItemIndex ) {
-            if ( itemIndex >= pendingFadeShapes.size() )
-                return;
-            MediaItem *item = GetTrackMediaItem(track, trackItemIndex);
-            if ( item ) {
-                const auto &shapes = pendingFadeShapes[itemIndex];
-                SetMediaItemInfo_Value(item, "C_FADEINSHAPE", shapes.fadeIn);
-                SetMediaItemInfo_Value(item, "C_FADEOUTSHAPE", shapes.fadeOut);
-            }
-            ++itemIndex;
-        }
-    }
-    UpdateArrange();
-}
-
 void OnProjectLoadTimer() {
     plugin_register("-timer", reinterpret_cast<void *>(OnProjectLoadTimer));
     // project is fully loaded here
     if ( isAafImport ) {
-        ApplyDeferredFadeShapes();
-        pendingFadeShapes.clear();
         if ( PrefsPage::getZoomAfterImport() )
             Main_OnCommand(kCmdId_ZoomProject, 0);
         isAafImport = false;
@@ -102,7 +74,6 @@ int aaf_ImportProject(const char *fn, ProjectStateContext *ctx) {
     if ( !fn || !ctx )
         return -1;
     isAafImport = true;
-    pendingFadeShapes.clear();
 
     const bool isDebug = PrefsPage::getShowDebug();
 
@@ -111,15 +82,11 @@ int aaf_ImportProject(const char *fn, ProjectStateContext *ctx) {
     try {
         logBuffer = std::make_unique<LogBuffer>(isDebug ? LogEntry::DEBUG : LogEntry::INFO);
         ReaperSink sink(ctx);
-        ok = AafImporter(&sink, fn, *logBuffer, &pendingFadeShapes).run();
+        ok = AafImporter(&sink, fn, *logBuffer).run();
     } catch ( const std::bad_alloc & ) {
         rlog("reAAF ERROR: Out of memory importing AAF file!!\n");
-        pendingFadeShapes.clear();
         return -1;
     }
-
-    if ( ok != 0 )
-        pendingFadeShapes.clear();
 
     const auto mode = PrefsPage::getVerbosity();
     if ( mode == PrefsPage::LogVerbosity::NONE )

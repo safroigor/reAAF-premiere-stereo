@@ -166,21 +166,6 @@ TEST_CASE(
     REQUIRE(sink.anyContains("NAME \"\""));
 }
 
-TEST_CASE("item: can defer non-linear fade shapes for safe project import") {
-    CapturingSink sink;
-    std::vector<ItemFadeShapes> deferred;
-    RppWriter w(&sink, &deferred);
-    {
-        auto i = w.item("clip", 0.0, 1.0, 0.1, 1, 0.2, 5, 1.0, 0.0, 0);
-    }
-
-    REQUIRE(sink.anyContains("FADEIN 0 0.1000000000 0"));
-    REQUIRE(sink.anyContains("FADEOUT 0 0.2000000000 0"));
-    REQUIRE(deferred.size() == 1);
-    REQUIRE(deferred[0].fadeIn == 1);
-    REQUIRE(deferred[0].fadeOut == 5);
-}
-
 TEST_CASE(
 
     "item: mute flag is emitted") {

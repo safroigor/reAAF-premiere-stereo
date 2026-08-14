@@ -448,6 +448,8 @@ TEST_CASE("emit: full composition roundtrip") {
 // rppSourceTypeFromPath
 // ---------------------------------------------------------------------------
 TEST_CASE("rppSourceTypeFromPath: maps extensions correctly") {
+    CHECK(std::string(rppSourceTypeFromPath(nullptr)) == "WAVE");
+    CHECK(std::string(rppSourceTypeFromPath("")) == "WAVE");
     CHECK(std::string(rppSourceTypeFromPath("/a/b/file.wav")) == "WAVE");
     CHECK(std::string(rppSourceTypeFromPath("/a/b/file.WAV")) == "WAVE");
     CHECK(std::string(rppSourceTypeFromPath("/a/b/file.mp3")) == "MP3");

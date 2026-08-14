@@ -148,7 +148,7 @@ struct WaveChunk {
 };
 
 struct WaveInfo {
-    std::string path;
+    std::filesystem::path path;
     std::vector<WaveChunk> chunks;
     std::vector<char> format;
     uint64_t dataOffset = 0;
@@ -166,11 +166,8 @@ bool idIs(const std::array<char, 4> &id, const char *s) {
 }
 
 bool readWaveInfo(const std::string &path, WaveInfo &info, std::string &error) {
-    info.path = path;
-    // LibAAF creates extracted files through the narrow Windows CRT API. Open
-    // with the same path semantics; u8path() can otherwise resolve a different
-    // filename when the source name contains non-ASCII characters.
-    std::ifstream in(path, std::ios::binary);
+    info.path = std::filesystem::u8path(path);
+    std::ifstream in(info.path, std::ios::binary);
     std::array<char, 12> header{};
     if ( !in ) {
         error = "could not open WAVE input: " + path;
@@ -296,7 +293,8 @@ bool interleaveWave(const std::string &leftPath, const std::string &rightPath,
     if ( left.formatTag == 0xfffe )
         putU32(stereoFormat, 20, 3); // front-left | front-right speaker mask
 
-    const auto temporaryPath = outputPath.string() + ".tmp";
+    auto temporaryPath = outputPath;
+    temporaryPath += ".tmp";
     std::ifstream leftIn(left.path, std::ios::binary);
     std::ifstream rightIn(right.path, std::ios::binary);
     std::ofstream out(temporaryPath, std::ios::binary | std::ios::trunc);
@@ -332,7 +330,7 @@ bool interleaveWave(const std::string &leftPath, const std::string &rightPath,
                      !rightIn.read(rightBlock.data(), monoBytes) ) {
                     error = "truncated WAVE sample data";
                     out.close();
-                    std::filesystem::remove(std::filesystem::u8path(temporaryPath));
+                    std::filesystem::remove(temporaryPath);
                     return false;
                 }
                 for ( uint64_t frame = 0; frame < frames; ++frame ) {
@@ -351,7 +349,7 @@ bool interleaveWave(const std::string &leftPath, const std::string &rightPath,
             if ( !copyBytes(leftIn, out, chunk.size) ) {
                 error = "failed to copy WAVE metadata";
                 out.close();
-                std::filesystem::remove(std::filesystem::u8path(temporaryPath));
+                std::filesystem::remove(temporaryPath);
                 return false;
             }
             if ( chunk.size & 1u )
@@ -361,16 +359,16 @@ bool interleaveWave(const std::string &leftPath, const std::string &rightPath,
     out.close();
     if ( !out ) {
         error = "failed to finish stereo WAVE";
-        std::filesystem::remove(std::filesystem::u8path(temporaryPath));
+        std::filesystem::remove(temporaryPath);
         return false;
     }
     std::error_code ec;
     std::filesystem::remove(outputPath, ec);
     ec.clear();
-    std::filesystem::rename(std::filesystem::u8path(temporaryPath), outputPath, ec);
+    std::filesystem::rename(temporaryPath, outputPath, ec);
     if ( ec ) {
         error = "failed to install stereo WAVE: " + ec.message();
-        std::filesystem::remove(std::filesystem::u8path(temporaryPath));
+        std::filesystem::remove(temporaryPath);
         return false;
     }
     return true;

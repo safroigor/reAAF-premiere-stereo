@@ -15,26 +15,15 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifdef _WIN32
-#include <direct.h>
-#include <windows.h>
-#else
-#include <sys/stat.h>
-#endif
-
 #include "helpers.h"
 #include "reaper_plugin_functions.h"
-#include <cerrno>
+#include <filesystem>
 
 bool ensure_dir(const std::string &path) {
-#ifdef _WIN32
-    if ( _mkdir(path.c_str()) == 0 || errno == EEXIST )
-        return true;
-#else
-    if ( mkdir(path.c_str(), 0755) == 0 || errno == EEXIST )
-        return true;
-#endif
-    return false;
+    std::error_code ec;
+    const auto directory = std::filesystem::u8path(path);
+    std::filesystem::create_directories(directory, ec);
+    return !ec && std::filesystem::is_directory(directory, ec) && !ec;
 }
 
 void rlog(const char *fmt, ...) {

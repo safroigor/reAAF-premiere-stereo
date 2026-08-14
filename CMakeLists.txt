@@ -76,6 +76,27 @@ set(BUILD_UNIT_TEST OFF CACHE BOOL "" FORCE)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON CACHE BOOL "" FORCE)
 add_subdirectory(${LIBAAF_DIR} extern/LibAAF)
 
+# LibAAF opens extracted embedded essence with narrow fopen(), even though it
+# already ships a UTF-8-aware wrapper. Build that single source from a generated
+# copy using the wrapper so AAFs and media folders may contain Unicode on Windows.
+if (WIN32)
+    set(_LIBAAF_ESSENCE_SOURCE "${LIBAAF_DIR}/src/AAFIface/AAFIEssenceFile.c")
+    file(READ "${_LIBAAF_ESSENCE_SOURCE}" _LIBAAF_ESSENCE_CONTENT)
+    string(REPLACE
+            "fp = fopen( filepath, \"wb\" );"
+            "fp = laaf_util_fopen_utf8( filepath, \"wb\" );"
+            _LIBAAF_ESSENCE_PATCHED "${_LIBAAF_ESSENCE_CONTENT}")
+    if (_LIBAAF_ESSENCE_PATCHED STREQUAL _LIBAAF_ESSENCE_CONTENT)
+        message(FATAL_ERROR "Could not apply LibAAF Unicode extraction fix")
+    endif ()
+    set(_LIBAAF_ESSENCE_GENERATED "${CMAKE_BINARY_DIR}/generated/AAFIEssenceFile.c")
+    file(WRITE "${_LIBAAF_ESSENCE_GENERATED}" "${_LIBAAF_ESSENCE_PATCHED}")
+    get_target_property(_LIBAAF_SOURCES aaf-static SOURCES)
+    list(FILTER _LIBAAF_SOURCES EXCLUDE REGEX "AAFIEssenceFile\\.c$")
+    list(APPEND _LIBAAF_SOURCES "${_LIBAAF_ESSENCE_GENERATED}")
+    set_property(TARGET aaf-static PROPERTY SOURCES "${_LIBAAF_SOURCES}")
+endif ()
+
 # Suppress LibAAF's internal asserts in debug builds — they fire on valid but
 # long ProductName/ProductVersionString strings (e.g. bext originator overflow).
 target_compile_definitions(aaf-static PRIVATE NDEBUG)
@@ -135,12 +156,6 @@ target_compile_definitions(reaper_aaf PRIVATE
         REAPERAPI_WANT_HasExtState
         REAPERAPI_WANT_GetMainHwnd
         REAPERAPI_WANT_Main_OnCommand
-        REAPERAPI_WANT_CountTracks
-        REAPERAPI_WANT_GetTrack
-        REAPERAPI_WANT_CountTrackMediaItems
-        REAPERAPI_WANT_GetTrackMediaItem
-        REAPERAPI_WANT_SetMediaItemInfo_Value
-        REAPERAPI_WANT_UpdateArrange
 )
 
 # -------------------------------------------------------------------------
