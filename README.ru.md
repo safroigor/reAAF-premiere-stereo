@@ -19,10 +19,12 @@ Adobe Premiere Pro со встроенным аудиоматериалом.
 ## Установка в Windows
 
 1. Закройте REAPER.
-2. Скопируйте `reaper_reAAF.dll` в `%APPDATA%\REAPER\UserPlugins`.
-3. Запустите REAPER заново.
-4. Выберите **File → Open Project** и откройте файл `.aaf`.
-5. После проверки сохраните проект в формате `.rpp`.
+2. Скачайте Windows DLL или готовый русскоязычный комплект из
+   [релиза v0.3.7-premiere-stereo.5](https://github.com/safroigor/reAAF-premiere-stereo/releases/tag/v0.3.7-premiere-stereo.5).
+3. Скопируйте `reaper_reAAF.dll` в `%APPDATA%\REAPER\UserPlugins`.
+4. Запустите REAPER заново.
+5. Выберите **File → Open Project** и откройте файл `.aaf`.
+6. После проверки сохраните проект в формате `.rpp`.
 
 При импорте встроенного аудио рядом с AAF создаётся папка
 `<имя AAF>-media`. Не удаляйте и не перемещайте её отдельно от сохранённого

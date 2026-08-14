@@ -43,7 +43,8 @@ Version `0.3.7-premiere-stereo.5` was validated for:
 ## Installation on Windows
 
 1. Close REAPER.
-2. Download the Windows x64 DLL or handoff package from the repository owner.
+2. Download the Windows x64 DLL or Russian handoff package from
+   [release v0.3.7-premiere-stereo.5](https://github.com/safroigor/reAAF-premiere-stereo/releases/tag/v0.3.7-premiere-stereo.5).
 3. Copy `reaper_reAAF.dll` to `%APPDATA%\REAPER\UserPlugins`.
 4. Restart REAPER.
 5. Select **File → Open Project** and choose an `.aaf` file.
