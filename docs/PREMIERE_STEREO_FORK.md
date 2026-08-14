@@ -8,15 +8,24 @@ were developed with Igor Safronov.
 
 Private repository: `https://github.com/safroigor/reAAF-premiere-stereo`
 
-Current version: `0.3.7-premiere-stereo.3`
+Current version: `0.3.7-premiere-stereo.4`
 
 Feature branch at initial validation: `agent/premiere-stereo-import`
 
 Initial implementation commit: `d31d96a Support Premiere breakout stereo AAF imports`
 
-Version `.3` corrects Premiere `CURV_PWR` / Constant Power fades. They now use
-REAPER's slight-convex equal-power shape (internal shape index 1), rather than
-the sharp-concave shape that was used previously.
+Version `.3` attempted to correct Premiere `CURV_PWR` / Constant Power fades by
+streaming REAPER's equal-power shape (internal index 1) directly through the
+project-import `ProjectStateContext`. It was withdrawn after REAPER 7.78 crashed
+with access violation `0xc0000005` in `VCRUNTIME140.dll` on two Windows systems.
+
+Version `.4` keeps the correct equal-power result without streaming a
+non-linear shape through the vulnerable import path. `RppWriter` emits shape 0
+as a temporary safe value and records the intended shape for every item. The
+post-load timer then restores `C_FADEINSHAPE` and `C_FADEOUTSHAPE` through
+REAPER's `SetMediaItemInfo_Value` API after the project is fully loaded. Unit
+tests cover the deferred representation. Do not restore the direct `.3`
+implementation unless the live REAPER importer path has been regression-tested.
 
 ## Validated source material
 
@@ -100,7 +109,7 @@ mismatch at REAPER's C++ `ProjectStateContext` virtual interface.
 
 Never distribute the old MinGW DLLs in `../plugin-backups`.
 
-Use the GitHub Actions `Build` workflow on Windows. Current validated `.2` run:
+Use the GitHub Actions `Build` workflow on Windows. Known-good rollback `.2`:
 
 - run ID: `31801461584`
 - artifact: `reaper-aaf-windows-x86_64`
@@ -109,6 +118,18 @@ Use the GitHub Actions `Build` workflow on Windows. Current validated `.2` run:
 
 The same run passed Windows x86_64, macOS arm64, macOS x86_64, and Linux x86_64
 build jobs.
+
+Fade-crash workaround `.4` candidate:
+
+- commit: `8d1c51a Avoid REAPER crash when importing fade shapes`
+- build run ID: `31809375276`
+- tests run ID: `31809357493`
+- Windows DLL size: `477696` bytes
+- SHA-256: `39DC29734326D186B7B6FD7C8149A544F3426EF6C81E35B23D1CF26CBC16C76B`
+
+Both workflows passed. Keep the `.2` package available until `.4` has also been
+opened manually with the private `Markers.aaf` fixture in the user's normal
+REAPER installation.
 
 ## Premiere embedded AAF 2 GiB limit
 
