@@ -18,7 +18,7 @@ Key rules for future work:
 - Premiere on Windows cannot reliably produce embedded-audio AAF near or above
   2 GiB. Recommend `Separate Audio`, a smaller trimmed embedded export, or split
   sequences. See `docs/PREMIERE_STEREO_FORK.md` for the validated corrupt case.
-- The validated source branch is `agent/premiere-stereo-import`.
+- The validated and default source branch is `main`.
 - The repository is
   `https://github.com/safroigor/reAAF-premiere-stereo`.
 - The validated Windows artifact and handoff package are recorded in
