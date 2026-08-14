@@ -132,13 +132,13 @@ Both workflows passed, but both `.2` and `.4` still crash when embedded AAF
 essence is extracted beside an AAF located in a Unicode folder. Passing CI did
 not reveal this because the automated paths were ASCII-only.
 
-Unicode extraction fix `.5` validation candidate:
+Validated Unicode extraction release `.5`:
 
-- commit: `ec44fe6 Expose LibAAF private headers to patched source`
-- build run ID: `31814368346`
-- tests run ID: `31814368386`
+- release commit: `9c0765e Promote Unicode path fix to validated version 0.3.7.5`
+- build run ID: `31815007138`
+- tests run ID: `31815007081`
 - Windows DLL size: `478208` bytes
-- SHA-256: `FECDF8613A83A9E51F483F0FCCE6EB464881E4C7031D07AB3836E963B05D30FC`
+- SHA-256: `8F78BC08478653D35902E2950205857F318F0B38D9D79AAAADAD270ECA5B231F`
 
 The build matrix passed on Windows x86_64, macOS arm64/x86_64, and Linux
 x86_64. The automated test workflow also passed. Igor Safronov manually opened
@@ -191,5 +191,6 @@ Verify all of the following:
 
 The colleague handoff folder is `../AAF to RPP`. It contains the
 validated Windows x64 DLL, a short Russian installation guide, version/hash
-information, and the GPL license. Update the DLL, version, hash, and guide
-together whenever a new build is released.
+information, and the GPL license. The matching archive is
+`../AAF-to-RPP-Windows-x64-v0.3.7-premiere-stereo.5.zip`. Update the DLL,
+version, hash, guide, and archive together whenever a new build is released.
