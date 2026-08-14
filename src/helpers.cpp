@@ -15,9 +15,10 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <filesystem>
+
 #include "helpers.h"
 #include "reaper_plugin_functions.h"
-#include <filesystem>
 
 bool ensure_dir(const std::string &path) {
     std::error_code ec;
