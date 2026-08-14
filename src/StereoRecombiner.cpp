@@ -69,8 +69,14 @@ bool envelopesEqual(const std::optional<EnvelopeData> &a,
 bool clipsMatch(const ClipData &left, const ClipData &right) {
     const auto leftName = splitSidedName(left.name);
     const auto rightName = splitSidedName(right.name);
-    if ( !leftName || !rightName || leftName->side != Side::Left ||
-         rightName->side != Side::Right || leftName->base != rightName->base )
+    const bool sidedPair = leftName && rightName && leftName->side == Side::Left &&
+                           rightName->side == Side::Right && leftName->base == rightName->base;
+    // Premiere can place a genuinely mono source on both sides of an otherwise
+    // valid breakout pair. Exact same-name/same-file clips are safe dual mono.
+    const bool sharedMono = left.name == right.name &&
+                            left.source.filePath == right.source.filePath &&
+                            !left.source.filePath.empty();
+    if ( !sidedPair && !sharedMono )
         return false;
     return nearlyEqual(left.pos, right.pos) && nearlyEqual(left.len, right.len) &&
            nearlyEqual(left.srcOffset, right.srcOffset) && nearlyEqual(left.gain, right.gain) &&
@@ -79,7 +85,7 @@ bool clipsMatch(const ClipData &left, const ClipData &right) {
            left.fadeOutShape == right.fadeOutShape && envelopesEqual(left.automation, right.automation) &&
            left.source.type == "WAVE" && right.source.type == "WAVE" &&
            !left.source.filePath.empty() && !right.source.filePath.empty() &&
-           left.source.filePath != right.source.filePath;
+           (left.source.filePath != right.source.filePath || sharedMono);
 }
 
 bool tracksMatch(const AudioTrackData &left, const AudioTrackData &right) {
@@ -142,7 +148,7 @@ struct WaveChunk {
 };
 
 struct WaveInfo {
-    std::filesystem::path path;
+    std::string path;
     std::vector<WaveChunk> chunks;
     std::vector<char> format;
     uint64_t dataOffset = 0;
@@ -160,9 +166,16 @@ bool idIs(const std::array<char, 4> &id, const char *s) {
 }
 
 bool readWaveInfo(const std::string &path, WaveInfo &info, std::string &error) {
-    info.path = std::filesystem::u8path(path);
-    std::ifstream in(info.path, std::ios::binary);
+    info.path = path;
+    // LibAAF creates extracted files through the narrow Windows CRT API. Open
+    // with the same path semantics; u8path() can otherwise resolve a different
+    // filename when the source name contains non-ASCII characters.
+    std::ifstream in(path, std::ios::binary);
     std::array<char, 12> header{};
+    if ( !in ) {
+        error = "could not open WAVE input: " + path;
+        return false;
+    }
     if ( !in.read(header.data(), static_cast<std::streamsize>(header.size())) ||
          std::string(header.data(), 4) != "RIFF" || std::string(header.data() + 8, 4) != "WAVE" ) {
         error = "not a RIFF/WAVE file";
@@ -453,7 +466,8 @@ void recombinePremiereBreakoutStereo(std::vector<AudioTrackData> &tracks,
                 }
                 generated = generatedSources.emplace(key, outputPath.u8string()).first;
             }
-            mergedClip.name = splitSidedName(mergedClip.name)->base;
+            if ( const auto sidedClipName = splitSidedName(mergedClip.name) )
+                mergedClip.name = sidedClipName->base;
             mergedClip.source = {"WAVE", generated->second};
         }
 

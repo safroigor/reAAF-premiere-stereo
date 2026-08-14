@@ -8,7 +8,7 @@ were developed with Igor Safronov.
 
 Private repository: `https://github.com/safroigor/reAAF-premiere-stereo`
 
-Current version: `0.3.7-premiere-stereo.1`
+Current version: `0.3.7-premiere-stereo.2`
 
 Feature branch at initial validation: `agent/premiere-stereo-import`
 
@@ -49,6 +49,12 @@ Compatible inputs are streamed and interleaved into a new stereo RIFF/WAVE file
 without sample conversion. PCM, IEEE float, and WAVE_FORMAT_EXTENSIBLE are
 supported. The original sample rate and bit depth are retained. A failed or
 ambiguous match falls back to the two original mono tracks.
+
+Version `.2` also accepts an exact same-name/same-file mono clip appearing on
+both sides of an otherwise confirmed breakout pair, producing lossless dual
+mono stereo. Extracted sources are opened with the same narrow Windows path
+semantics used by LibAAF, which is required for names containing non-ASCII
+characters such as `Landström`.
 
 `src/AafImporter.cpp` runs recombination after embedded essence extraction.
 
@@ -122,4 +128,3 @@ The colleague handoff folder is `../AAF to RPP - для коллег`. It contai
 validated Windows x64 DLL, a short Russian installation guide, version/hash
 information, and the GPL license. Update the DLL, version, hash, and guide
 together whenever a new build is released.
-

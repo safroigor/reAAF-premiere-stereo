@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.7-premiere-stereo.2] - 2026-08-14
+
+- recombine Premiere breakout pairs containing exact shared dual-mono clips
+- open embedded WAVE sources with LibAAF-compatible Windows path semantics,
+  including non-ASCII source names
+- distinguish an unreadable WAVE path from an invalid RIFF/WAVE header in logs
+
 ## [0.3.7] - 2026-06-23
 
 - version bump for Reapack (no changes)

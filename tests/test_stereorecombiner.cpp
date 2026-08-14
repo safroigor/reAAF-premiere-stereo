@@ -55,6 +55,25 @@ void writeMono16Wave(const std::filesystem::path &path, const std::vector<int16_
         writeU16(out, static_cast<uint16_t>(sample));
 }
 
+void writeMono16WaveNarrow(const std::string &path, const std::vector<int16_t> &samples) {
+    std::ofstream out(path, std::ios::binary);
+    const auto dataSize = static_cast<uint32_t>(samples.size() * sizeof(int16_t));
+    out.write("RIFF", 4);
+    writeU32(out, 36 + dataSize);
+    out.write("WAVEfmt ", 8);
+    writeU32(out, 16);
+    writeU16(out, 1);
+    writeU16(out, 1);
+    writeU32(out, 48000);
+    writeU32(out, 96000);
+    writeU16(out, 2);
+    writeU16(out, 16);
+    out.write("data", 4);
+    writeU32(out, dataSize);
+    for ( const auto sample : samples )
+        writeU16(out, static_cast<uint16_t>(sample));
+}
+
 void writeMono24Wave(const std::filesystem::path &path, const std::vector<char> &sampleBytes) {
     REQUIRE(sampleBytes.size() % 3 == 0);
     std::ofstream out(path, std::ios::binary);
@@ -208,4 +227,43 @@ TEST_CASE("center-panned L/R names are not guessed to be breakout stereo") {
     recombinePremiereBreakoutStereo(tracks, temp.path.string(), log);
 
     CHECK(tracks.size() == 2);
+}
+
+TEST_CASE("non-ASCII files created through the narrow path API are recombined") {
+    TempDir temp;
+    const auto leftPath = temp.path.string() + "/Landstr\xc3\xb6m_L.wav";
+    const auto rightPath = temp.path.string() + "/Landstr\xc3\xb6m_R.wav";
+    writeMono16WaveNarrow(leftPath, {1, 2});
+    writeMono16WaveNarrow(rightPath, {10, 20});
+    std::vector<AudioTrackData> tracks{
+        makeTrack("MX_L", -1.0, leftPath), makeTrack("MX_R", 1.0, rightPath)};
+    LogBuffer log;
+
+    recombinePremiereBreakoutStereo(tracks, temp.path.string(), log);
+
+    REQUIRE(tracks.size() == 1);
+    uint16_t channels = 0;
+    CHECK(readWaveSamples(tracks[0].clips[0].source.filePath, channels) ==
+          std::vector<int16_t>{1, 10, 2, 20});
+    CHECK(channels == 2);
+}
+
+TEST_CASE("shared mono clips inside a breakout pair become dual mono stereo") {
+    TempDir temp;
+    const auto monoPath = temp.path / "shared_mono.wav";
+    writeMono16Wave(monoPath, {7, -8});
+    auto left = makeTrack("FX_L", -1.0, monoPath.string());
+    auto right = makeTrack("FX_R", 1.0, monoPath.string());
+    left.clips[0].name = "shared_mono.wav";
+    right.clips[0].name = "shared_mono.wav";
+    std::vector<AudioTrackData> tracks{left, right};
+    LogBuffer log;
+
+    recombinePremiereBreakoutStereo(tracks, temp.path.string(), log);
+
+    REQUIRE(tracks.size() == 1);
+    uint16_t channels = 0;
+    CHECK(readWaveSamples(tracks[0].clips[0].source.filePath, channels) ==
+          std::vector<int16_t>{7, 7, -8, -8});
+    CHECK(channels == 2);
 }
