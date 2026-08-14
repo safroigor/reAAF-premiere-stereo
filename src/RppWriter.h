@@ -20,6 +20,13 @@
 
 #include "IRppSink.h"
 
+#include <vector>
+
+struct ItemFadeShapes {
+    int fadeIn = 0;
+    int fadeOut = 0;
+};
+
 // ---------------------------------------------------------------------------
 // RppWriter
 //
@@ -37,7 +44,8 @@
 // ---------------------------------------------------------------------------
 class RppWriter {
   public:
-    explicit RppWriter(IRppSink *sink) : m_sink(sink) {}
+    explicit RppWriter(IRppSink *sink, std::vector<ItemFadeShapes> *deferredFadeShapes = nullptr)
+        : m_sink(sink), m_deferredFadeShapes(deferredFadeShapes) {}
 
     // Non-copyable — guards hold a reference back to the writer.
     RppWriter(const RppWriter &) = delete;
@@ -113,6 +121,11 @@ class RppWriter {
 
   private:
     IRppSink *m_sink; // not owned — lifetime tied to caller
+
+    // REAPER 7.78 can crash while a project importer streams non-linear item
+    // fade shapes through ProjectStateContext. When supplied, this list lets
+    // item() stream safe placeholders and restore the intended shapes later.
+    std::vector<ItemFadeShapes> *m_deferredFadeShapes;
 
     void line(const char *fmt, ...) const;
 };

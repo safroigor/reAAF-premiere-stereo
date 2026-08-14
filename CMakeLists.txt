@@ -135,6 +135,12 @@ target_compile_definitions(reaper_aaf PRIVATE
         REAPERAPI_WANT_HasExtState
         REAPERAPI_WANT_GetMainHwnd
         REAPERAPI_WANT_Main_OnCommand
+        REAPERAPI_WANT_CountTracks
+        REAPERAPI_WANT_GetTrack
+        REAPERAPI_WANT_CountTrackMediaItems
+        REAPERAPI_WANT_GetTrackMediaItem
+        REAPERAPI_WANT_SetMediaItemInfo_Value
+        REAPERAPI_WANT_UpdateArrange
 )
 
 # -------------------------------------------------------------------------

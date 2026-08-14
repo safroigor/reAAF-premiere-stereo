@@ -107,9 +107,10 @@ void AafImporter::libaafLogCallback(aafLog *, void *, const int lib, const int t
 }
 
 
-AafImporter::AafImporter(IRppSink *sink, const char *filepath, LogBuffer &logBuffer)
-    : m_writer(sink), m_aafi(AafiHandle(aafi_alloc(nullptr))), m_filePath(filepath),
-      m_extractDir(buildExtractDir(filepath)), m_logBuffer(logBuffer) {}
+AafImporter::AafImporter(IRppSink *sink, const char *filepath, LogBuffer &logBuffer,
+                         std::vector<ItemFadeShapes> *deferredFadeShapes)
+    : m_writer(sink, deferredFadeShapes), m_aafi(AafiHandle(aafi_alloc(nullptr))),
+      m_filePath(filepath), m_extractDir(buildExtractDir(filepath)), m_logBuffer(logBuffer) {}
 
 int AafImporter::run() {
     if ( !m_aafi ) {

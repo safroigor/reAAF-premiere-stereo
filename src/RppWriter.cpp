@@ -78,11 +78,18 @@ auto RppWriter::item(const char *name, const double posSec, const double lenSec,
                      const double fadeInLen, const int fadeInShape, const double fadeOutLen,
                      const int fadeOutShape, const double gainLin, const double srcOffsSec,
                      const int mute) -> Chunk {
+    int emittedFadeInShape = fadeInShape;
+    int emittedFadeOutShape = fadeOutShape;
+    if ( m_deferredFadeShapes ) {
+        m_deferredFadeShapes->push_back({fadeInShape, fadeOutShape});
+        emittedFadeInShape = 0;
+        emittedFadeOutShape = 0;
+    }
     line("<ITEM");
     line("POSITION %.10f", posSec);
     line("LENGTH %.10f", lenSec);
-    line("FADEIN %d %.10f 0", fadeInShape, fadeInLen);
-    line("FADEOUT %d %.10f 0", fadeOutShape, fadeOutLen);
+    line("FADEIN %d %.10f 0", emittedFadeInShape, fadeInLen);
+    line("FADEOUT %d %.10f 0", emittedFadeOutShape, fadeOutLen);
     line("MUTE %d 0", mute);
     line("NAME \"%s\"", name ? escape_rpp_string(name).c_str() : "");
     line("VOLPAN %.6f 0.000000 1.000000 -1", gainLin);
