@@ -133,6 +133,18 @@ essence is extracted beside an AAF located in a Unicode folder. Passing CI did
 not reveal this because the automated paths were ASCII-only. A `.5-test` build
 must be opened manually from the exact Unicode test path before distribution.
 
+Unicode extraction fix `.5-test` candidate:
+
+- commit: `ec44fe6 Expose LibAAF private headers to patched source`
+- build run ID: `31814368346`
+- tests run ID: `31814368386`
+- Windows DLL size: `478208` bytes
+- SHA-256: `FECDF8613A83A9E51F483F0FCCE6EB464881E4C7031D07AB3836E963B05D30FC`
+
+The build matrix passed on Windows x86_64, macOS arm64/x86_64, and Linux
+x86_64. The automated test workflow also passed. Manual Unicode-path validation
+is still required before promoting this candidate to the colleague package.
+
 ## Premiere embedded AAF 2 GiB limit
 
 Premiere on Windows does not support embedded-audio AAF files larger than 2 GB.
