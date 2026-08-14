@@ -78,9 +78,9 @@ For the private integration fixture, configure with
 `REAAF_PREMIERE_TEST_AAF=<absolute path>` and optionally
 `REAAF_PREMIERE_TEST_RPP_OUTPUT=<absolute output path>`.
 
-At initial validation:
+Current regression coverage:
 
-- StereoRecombiner: 14 assertions in 4 cases passed;
+- StereoRecombiner: 20 assertions in 6 cases passed;
 - private Premiere integration: 20 assertions passed;
 - RppWriter: 55 assertions passed;
 - AafEmitter: 56 assertions passed;
@@ -96,15 +96,38 @@ mismatch at REAPER's C++ `ProjectStateContext` virtual interface.
 
 Never distribute the old MinGW DLLs in `../plugin-backups`.
 
-Use the GitHub Actions `Build` workflow on Windows. Initial validated run:
+Use the GitHub Actions `Build` workflow on Windows. Current validated `.2` run:
 
-- run ID: `31793780451`
+- run ID: `31801461584`
 - artifact: `reaper-aaf-windows-x86_64`
-- DLL size: `475136` bytes
-- SHA-256: `CD284FB773D73108235CB43BA6D9B19326D486E0C070AD5036059A5143A11AF2`
+- DLL size: `476672` bytes
+- SHA-256: `1DD907B0E6DEA530D47DA39587EA5C0E91D577FCDC4E6CBBFBD7ADF95FBA2E8C`
 
 The same run passed Windows x86_64, macOS arm64, macOS x86_64, and Linux x86_64
 build jobs.
+
+## Premiere embedded AAF 2 GiB limit
+
+Premiere on Windows does not support embedded-audio AAF files larger than 2 GB.
+The validated failure fixture `PROBLEM.aaf` was a version 3 CFB container with
+512-byte sectors and a size of `2147418624` bytes, only `65024` bytes below
+2 GiB. LibAAF could open the CFB header but could not load the AAF object model.
+
+Forensics showed that the root `properties` stream had zero length, the valid
+directory entries stopped after the initial essence skeleton, the directory
+chain continued into apparent media data, and it terminated with `FATSECT`
+instead of `ENDOFCHAIN`. The timeline metadata was never finalized, so the file
+cannot be repaired or converted to RPP. Do not commit or redistribute this
+private fixture.
+
+Ask the editor to re-export using one of these workflows:
+
+1. `Separate Audio` (Adobe's recommended option for large AAFs), keeping the
+   AAF and media folder together or wrapping them in one ZIP archive.
+2. `Trim Audio Files` with reasonable handle frames so an embedded AAF stays
+   comfortably below 2 GiB.
+3. Split the sequence into multiple smaller embedded AAFs if a self-contained
+   file is mandatory.
 
 ## Installation and manual verification
 
@@ -124,7 +147,7 @@ Verify all of the following:
 
 ## Distribution package
 
-The colleague handoff folder is `../AAF to RPP - для коллег`. It contains the
+The colleague handoff folder is `../AAF to RPP`. It contains the
 validated Windows x64 DLL, a short Russian installation guide, version/hash
 information, and the GPL license. Update the DLL, version, hash, and guide
 together whenever a new build is released.
