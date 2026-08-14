@@ -13,6 +13,8 @@ incompatible pairs remain as separate mono tracks.
 The fork also emits Windows media paths and project timecode settings in a
 format accepted by REAPER's project parser.
 
+Premiere stereo workflow and validation developed with Igor Safronov.
+
 [![Build](https://github.com/smandrap/reAAF/actions/workflows/build.yml/badge.svg)](https://github.com/smandrap/reAAF/actions/workflows/build.yml)
 [![Tests](https://github.com/smandrap/reAAF/actions/workflows/tests.yml/badge.svg)](https://github.com/smandrap/reAAF/actions/workflows/tests.yml)
 [![CodeQL](https://github.com/smandrap/reAAF/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/smandrap/reAAF/actions/workflows/github-code-scanning/codeql)
