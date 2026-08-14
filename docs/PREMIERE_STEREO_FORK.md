@@ -8,7 +8,7 @@ were developed with Igor Safronov.
 
 Private repository: `https://github.com/safroigor/reAAF-premiere-stereo`
 
-Current test version: `0.3.7-premiere-stereo.5-test`
+Current validated version: `0.3.7-premiere-stereo.5`
 
 Feature branch at initial validation: `agent/premiere-stereo-import`
 
@@ -17,7 +17,7 @@ Initial implementation commit: `d31d96a Support Premiere breakout stereo AAF imp
 Version `.3` corrected Premiere `CURV_PWR` / Constant Power fades to REAPER's
 equal-power shape (internal index 1). Versions `.3` and `.4` were initially
 suspected of causing a REAPER 7.78 crash, but a full process dump disproved that
-hypothesis. Version `.5-test` removes the unnecessary `.4` deferred-fade
+hypothesis. Version `.5` removes the unnecessary `.4` deferred-fade
 workaround while retaining the corrected fade mapping.
 
 The actual crash was a pre-existing Unicode extraction defect. LibAAF used
@@ -25,7 +25,7 @@ narrow `fopen()` for embedded essence output. When an AAF was opened from a
 folder such as `TestAAF/Тест2`, media-directory creation/extraction failed and
 the importer passed a null `original_file_path` into `strrchr()`. The dump shows
 the exact stack `VCRUNTIME140!strrchr -> rppSourceTypeFromPath -> AafImporter`.
-Version `.5-test` uses UTF-8-aware directory and essence-file operations, guards
+Version `.5` uses UTF-8-aware directory and essence-file operations, guards
 the path helper, and emits an empty source instead of dereferencing a missing
 fallback path.
 
@@ -67,7 +67,7 @@ ambiguous match falls back to the two original mono tracks.
 
 Version `.2` also accepts an exact same-name/same-file mono clip appearing on
 both sides of an otherwise confirmed breakout pair, producing lossless dual
-mono stereo. Version `.5-test` opens extracted sources with UTF-8-aware
+mono stereo. Version `.5` opens extracted sources with UTF-8-aware
 filesystem paths, including names such as `Landström` and Cyrillic folders.
 
 `src/AafImporter.cpp` runs recombination after embedded essence extraction.
@@ -130,10 +130,9 @@ Withdrawn `.4` artifact (the fade workaround did not address the crash):
 
 Both workflows passed, but both `.2` and `.4` still crash when embedded AAF
 essence is extracted beside an AAF located in a Unicode folder. Passing CI did
-not reveal this because the automated paths were ASCII-only. A `.5-test` build
-must be opened manually from the exact Unicode test path before distribution.
+not reveal this because the automated paths were ASCII-only.
 
-Unicode extraction fix `.5-test` candidate:
+Unicode extraction fix `.5` validation candidate:
 
 - commit: `ec44fe6 Expose LibAAF private headers to patched source`
 - build run ID: `31814368346`
@@ -142,8 +141,10 @@ Unicode extraction fix `.5-test` candidate:
 - SHA-256: `FECDF8613A83A9E51F483F0FCCE6EB464881E4C7031D07AB3836E963B05D30FC`
 
 The build matrix passed on Windows x86_64, macOS arm64/x86_64, and Linux
-x86_64. The automated test workflow also passed. Manual Unicode-path validation
-is still required before promoting this candidate to the colleague package.
+x86_64. The automated test workflow also passed. Igor Safronov manually opened
+the embedded-audio fixture from the Cyrillic `Тест2` directory in REAPER 7.78:
+the project opened without a crash, `_L`/`_R` tracks recombined as stereo, and
+item fades were correct. This validates the Unicode crash fix for distribution.
 
 ## Premiere embedded AAF 2 GiB limit
 
