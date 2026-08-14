@@ -91,6 +91,8 @@ if (WIN32)
     endif ()
     set(_LIBAAF_ESSENCE_GENERATED "${CMAKE_BINARY_DIR}/generated/AAFIEssenceFile.c")
     file(WRITE "${_LIBAAF_ESSENCE_GENERATED}" "${_LIBAAF_ESSENCE_PATCHED}")
+    set_source_files_properties("${_LIBAAF_ESSENCE_GENERATED}" PROPERTIES
+            INCLUDE_DIRECTORIES "${LIBAAF_DIR}/src/AAFIface")
     get_target_property(_LIBAAF_SOURCES aaf-static SOURCES)
     list(FILTER _LIBAAF_SOURCES EXCLUDE REGEX "AAFIEssenceFile\\.c$")
     list(APPEND _LIBAAF_SOURCES "${_LIBAAF_ESSENCE_GENERATED}")
