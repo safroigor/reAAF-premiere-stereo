@@ -20,6 +20,7 @@
 #include "AafiHandle.h"
 #include "FadeResolver.h"
 #include "LogBuffer.h"
+#include "StereoRecombiner.h"
 #include "helpers.h"
 
 #include <libaaf.h>
@@ -186,6 +187,8 @@ CompositionData AafImporter::extractComposition() {
         for ( auto &st : subtracks )
             comp.audioTracks.push_back(std::move(st));
     }
+
+    recombinePremiereBreakoutStereo(comp.audioTracks, m_extractDir, m_logBuffer);
 
     return comp;
 }

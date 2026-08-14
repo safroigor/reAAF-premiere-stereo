@@ -15,6 +15,10 @@ set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+option(REAAF_COPY_PLUGIN_TO_REAPER
+        "Copy the built plugin to the current user's REAPER UserPlugins directory"
+        ON)
+
 
 # -------------------------------------------------------------------------
 # Test frameworks (Catch2 + trompeloeil, no REAPER SDK required)
@@ -91,6 +95,7 @@ add_library(reaper_aaf MODULE
         src/AafImporter.cpp
         src/AafEmitter.cpp
         src/FadeResolver.cpp
+        src/StereoRecombiner.cpp
         src/LogBuffer.cpp
         src/PrefsPage.cpp
         src/LogDialog.cpp
@@ -158,12 +163,14 @@ if (WIN32)
     )
     target_sources(reaper_aaf PRIVATE ${CMAKE_SOURCE_DIR}/src/resource.rc)
     set(REAPER_PLUGINS_DIR "$ENV{APPDATA}/REAPER/UserPlugins")
-    add_custom_command(TARGET reaper_aaf POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            $<TARGET_FILE:reaper_aaf>
-            "${REAPER_PLUGINS_DIR}/reaper_reAAF.dll"
-            COMMENT "Copying to REAPER UserPlugins..."
-    )
+    if (REAAF_COPY_PLUGIN_TO_REAPER)
+        add_custom_command(TARGET reaper_aaf POST_BUILD
+                COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                $<TARGET_FILE:reaper_aaf>
+                "${REAPER_PLUGINS_DIR}/reaper_reAAF.dll"
+                COMMENT "Copying to REAPER UserPlugins..."
+        )
+    endif ()
 
 elseif (APPLE)
     set_target_properties(reaper_aaf PROPERTIES
@@ -177,12 +184,14 @@ elseif (APPLE)
             src/resource_swell.cpp
     )
     set(REAPER_PLUGINS_DIR "$ENV{HOME}/Library/Application Support/REAPER/UserPlugins")
-    add_custom_command(TARGET reaper_aaf POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            $<TARGET_FILE:reaper_aaf>
-            "${REAPER_PLUGINS_DIR}/reaper_reAAF-${CMAKE_SYSTEM_PROCESSOR}.dylib"
-            COMMENT "Copying to REAPER UserPlugins..."
-    )
+    if (REAAF_COPY_PLUGIN_TO_REAPER)
+        add_custom_command(TARGET reaper_aaf POST_BUILD
+                COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                $<TARGET_FILE:reaper_aaf>
+                "${REAPER_PLUGINS_DIR}/reaper_reAAF-${CMAKE_SYSTEM_PROCESSOR}.dylib"
+                COMMENT "Copying to REAPER UserPlugins..."
+        )
+    endif ()
 
 else ()  # Linux
     set_target_properties(reaper_aaf PROPERTIES SUFFIX ".so")

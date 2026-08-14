@@ -17,6 +17,7 @@
 
 #include "RppWriter.h"
 
+#include <algorithm>
 #include <cassert>
 
 #include "helpers.h"
@@ -54,7 +55,7 @@ auto RppWriter::project(const double tcOffsetSec, const double maxProjLen, const
     line("PROJOFFS %.10f 0 0", tcOffsetSec);
     line("MAXPROJLEN 0 %.10f", maxProjLen + 60);
     // Limit project length 1 min after composition length
-    line("TIMEMODE 5 2 5 %d %d -1 2 0", fps, isDrop);
+    line("TIMEMODE 1 5 -1 %d %d 0 -1", fps, isDrop);
     line("SMPTESYNC 0 %d 100 40 1000 300 0 0 0 0 0", fps);
     line("SAMPLERATE %u 0 0", samplerate);
     line("PANMODE 3");
@@ -92,8 +93,13 @@ auto RppWriter::item(const char *name, const double posSec, const double lenSec,
 
 auto RppWriter::source(const char *type, const char *filePath) -> Chunk {
     assert(type && filePath && *filePath != '\0');
+    // REAPER project files use literal path separators. Converting Windows
+    // backslashes to forward slashes avoids producing doubled backslashes via
+    // escape_rpp_string(), which REAPER's project parser rejects.
+    std::string normalizedPath(filePath);
+    std::replace(normalizedPath.begin(), normalizedPath.end(), '\\', '/');
     line("<SOURCE %s", type);
-    line("FILE \"%s\"", escape_rpp_string(filePath).c_str());
+    line("FILE \"%s\"", escape_rpp_string(normalizedPath.c_str()).c_str());
     return Chunk{*this};
 }
 

@@ -42,6 +42,7 @@ add_catch2_test(test_aafimporter SOURCES
         ${CMAKE_SOURCE_DIR}/src/AafEmitter.cpp
         ${CMAKE_SOURCE_DIR}/src/RppWriter.cpp
         ${CMAKE_SOURCE_DIR}/src/FadeResolver.cpp
+        ${CMAKE_SOURCE_DIR}/src/StereoRecombiner.cpp
         ${CMAKE_SOURCE_DIR}/src/LogBuffer.cpp
 )
 target_link_libraries(test_aafimporter PRIVATE aaf-static)
@@ -64,6 +65,29 @@ target_include_directories(test_aafemitter PRIVATE
         ${CMAKE_BINARY_DIR}/include
 )
 
+add_catch2_test(test_stereorecombiner SOURCES
+        test_stereorecombiner.cpp
+        helpers_stubs.cpp
+        ${CMAKE_SOURCE_DIR}/src/StereoRecombiner.cpp
+        ${CMAKE_SOURCE_DIR}/src/LogBuffer.cpp
+)
+
+add_catch2_test(test_premiere_breakout_integration SOURCES
+        test_premiere_breakout_integration.cpp
+        helpers_stubs.cpp
+        ${CMAKE_SOURCE_DIR}/src/AafImporter.cpp
+        ${CMAKE_SOURCE_DIR}/src/AafEmitter.cpp
+        ${CMAKE_SOURCE_DIR}/src/RppWriter.cpp
+        ${CMAKE_SOURCE_DIR}/src/FadeResolver.cpp
+        ${CMAKE_SOURCE_DIR}/src/StereoRecombiner.cpp
+        ${CMAKE_SOURCE_DIR}/src/LogBuffer.cpp
+)
+target_link_libraries(test_premiere_breakout_integration PRIVATE aaf-static)
+target_include_directories(test_premiere_breakout_integration PRIVATE
+        ${CMAKE_SOURCE_DIR}/extern/LibAAF/include
+        ${CMAKE_BINARY_DIR}/include
+)
+
 add_catch2_test(test_aafimporter_mr SOURCES
         test_aafimporter_mr.cpp
         helpers_stubs.cpp
@@ -71,6 +95,7 @@ add_catch2_test(test_aafimporter_mr SOURCES
         ${CMAKE_SOURCE_DIR}/src/AafEmitter.cpp
         ${CMAKE_SOURCE_DIR}/src/RppWriter.cpp
         ${CMAKE_SOURCE_DIR}/src/FadeResolver.cpp
+        ${CMAKE_SOURCE_DIR}/src/StereoRecombiner.cpp
         ${CMAKE_SOURCE_DIR}/src/LogBuffer.cpp
 )
 target_link_libraries(test_aafimporter_mr PRIVATE aaf-static)
@@ -94,6 +119,8 @@ add_custom_target(all_tests
         test_faderesolver
         test_rppwriter
         test_aafemitter
+        test_stereorecombiner
+        test_premiere_breakout_integration
         test_aafimporter
         test_aafimporter_mr
 )
@@ -113,6 +140,8 @@ catch_discover_tests(test_helpers)
 catch_discover_tests(test_faderesolver)
 catch_discover_tests(test_rppwriter)
 catch_discover_tests(test_aafemitter)
+catch_discover_tests(test_stereorecombiner)
+catch_discover_tests(test_premiere_breakout_integration)
 catch_discover_tests(test_aafimporter)
 catch_discover_tests(test_aafimporter_mr)
 

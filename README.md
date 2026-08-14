@@ -2,6 +2,17 @@
 
 REAPER extension that imports AAF (Advanced Authoring Format) session files as REAPER projects, relying on [LibAAF](https://github.com/agfline/LibAAF).
 
+## Premiere breakout stereo fork
+
+This fork safely recombines adjacent, hard-panned `_L` / `_R` tracks created by
+Adobe Premiere's Breakout to Mono AAF export. Matching embedded mono WAVE
+essences are interleaved losslessly into stereo WAVE files while clip timing,
+source offsets, fades, gain and automation are preserved. Ambiguous or
+incompatible pairs remain as separate mono tracks.
+
+The fork also emits Windows media paths and project timecode settings in a
+format accepted by REAPER's project parser.
+
 [![Build](https://github.com/smandrap/reAAF/actions/workflows/build.yml/badge.svg)](https://github.com/smandrap/reAAF/actions/workflows/build.yml)
 [![Tests](https://github.com/smandrap/reAAF/actions/workflows/tests.yml/badge.svg)](https://github.com/smandrap/reAAF/actions/workflows/tests.yml)
 [![CodeQL](https://github.com/smandrap/reAAF/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/smandrap/reAAF/actions/workflows/github-code-scanning/codeql)

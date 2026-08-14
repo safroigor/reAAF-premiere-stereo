@@ -170,6 +170,21 @@ TEST_CASE("emitSource: WAVE source emits FILE line with path") {
     REQUIRE(sink.anyContains("kick.wav"));
 }
 
+TEST_CASE("emitSource: Windows path uses REAPER-compatible separators") {
+    CapturingSink sink;
+    RppWriter writer(&sink);
+    AafEmitter emitter(writer);
+
+    SourceData s;
+    s.type = "WAVE";
+    s.filePath = "C:\\audio\\kick.wav";
+
+    emitter.emitSource(s);
+
+    REQUIRE(sink.anyContains("FILE \"C:/audio/kick.wav\""));
+    CHECK_FALSE(sink.anyContains("C:\\\\audio"));
+}
+
 TEST_CASE("emitSource: MP3 source emits correct type") {
     CapturingSink sink;
     RppWriter writer(&sink);

@@ -197,13 +197,13 @@ TEST_CASE(
 
 TEST_CASE(
 
-    "source: path with backslashes is escaped") {
+    "source: Windows path uses REAPER-compatible separators") {
     CapturingSink sink;
     RppWriter w(&sink);
     {
         auto s = w.source("WAVE", "C:\\audio\\kick.wav");
     }
-    REQUIRE(sink.contains("FILE \"C:\\\\audio\\\\kick.wav\""));
+    REQUIRE(sink.contains("FILE \"C:/audio/kick.wav\""));
 }
 
 // ---------------------------------------------------------------------------
