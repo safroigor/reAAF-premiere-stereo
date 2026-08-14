@@ -1,5 +1,35 @@
 # Changelog
 
+## [0.3.7-premiere-stereo.5] - 2026-08-14
+
+### Premiere stereo workflow
+
+- detect conservative adjacent hard-panned `_L` / `_R` breakout pairs;
+- interleave compatible mono PCM/float WAVE sources into lossless stereo;
+- support shared-source dual-mono clips inside a confirmed breakout pair;
+- retain ambiguous or incompatible material as separate mono tracks.
+
+### Reliability and compatibility
+
+- extract embedded essence through UTF-8-aware Windows file operations;
+- support AAF files and media directories containing Unicode and Cyrillic;
+- prevent a null source-path fallback from crashing REAPER;
+- normalize Windows source paths for REAPER's project parser;
+- emit complete project timecode settings;
+- correct Premiere Constant Power fade mapping.
+
+### Validation
+
+- validated with embedded 48 kHz / 24-bit Premiere AAF in REAPER 7.78;
+- validated stereo reconstruction, Unicode paths, item fades, timing, and
+  safe mono fallback;
+- pass automated tests and build matrix on Windows x64, macOS arm64/x64, and
+  Linux x64.
+
+Versions `.3` and `.4` were internal test builds and were not released. Their
+suspected fade-related crash was later traced to embedded extraction from a
+Unicode directory and fixed in `.5`.
+
 ## [0.3.7-premiere-stereo.2] - 2026-08-14
 
 - recombine Premiere breakout pairs containing exact shared dual-mono clips

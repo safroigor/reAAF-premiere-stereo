@@ -1,6 +1,6 @@
 # reAAF Premiere stereo fork notes
 
-This is the private Premiere stereo fork maintained for Igor Safronov. Read
+This is the Premiere stereo edition maintained with Igor Safronov. Read
 `docs/PREMIERE_STEREO_FORK.md` before investigating, building, packaging, or
 changing the importer.
 
@@ -19,7 +19,7 @@ Key rules for future work:
   2 GiB. Recommend `Separate Audio`, a smaller trimmed embedded export, or split
   sequences. See `docs/PREMIERE_STEREO_FORK.md` for the validated corrupt case.
 - The validated source branch is `agent/premiere-stereo-import`.
-- The private repository is
+- The repository is
   `https://github.com/safroigor/reAAF-premiere-stereo`.
 - The validated Windows artifact and handoff package are recorded in
   `docs/PREMIERE_STEREO_FORK.md`.

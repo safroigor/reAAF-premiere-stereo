@@ -2,11 +2,11 @@
 
 ## Purpose and ownership
 
-This private fork extends `smandrap/reAAF` for AAF files exported by Adobe
+This edition extends `smandrap/reAAF` for AAF files exported by Adobe
 Premiere Pro with embedded audio. The workflow and Premiere stereo requirement
 were developed with Igor Safronov.
 
-Private repository: `https://github.com/safroigor/reAAF-premiere-stereo`
+Repository: `https://github.com/safroigor/reAAF-premiere-stereo`
 
 Current validated version: `0.3.7-premiere-stereo.5`
 
@@ -31,7 +31,7 @@ fallback path.
 
 ## Validated source material
 
-The private test fixture was exported by Adobe Premiere Pro 26.3. It contains
+The non-redistributable test fixture was exported by Adobe Premiere Pro 26.3. It contains
 embedded 48 kHz, 24-bit PCM mono WAVE essence and six audio tracks:
 
 - `VO1`
@@ -48,7 +48,7 @@ Expected imported result: four audio tracks (`VO1`, `VO2`, stereo `GP`, stereo
 `MX1`) plus the video track. The user confirmed that the resulting AAF import
 opens correctly in REAPER.
 
-The customer AAF and extracted audio are private test data. Do not commit or
+The customer AAF and extracted audio are confidential test data. Do not commit or
 redistribute them.
 
 ## Implementation
@@ -85,17 +85,17 @@ Relevant tests:
 
 - `tests/test_stereorecombiner.cpp`: 16-bit and 24-bit interleave plus safety
   and fallback cases;
-- `tests/test_premiere_breakout_integration.cpp`: optional private AAF fixture;
+- `tests/test_premiere_breakout_integration.cpp`: optional local AAF fixture;
 - existing `RppWriter`, `AafEmitter`, and `AafImporter` suites.
 
-For the private integration fixture, configure with
+For the local integration fixture, configure with
 `REAAF_PREMIERE_TEST_AAF=<absolute path>` and optionally
 `REAAF_PREMIERE_TEST_RPP_OUTPUT=<absolute output path>`.
 
 Current regression coverage:
 
 - StereoRecombiner: 20 assertions in 6 cases passed;
-- private Premiere integration: 20 assertions passed;
+- local Premiere integration: 20 assertions passed;
 - RppWriter: 55 assertions passed;
 - AafEmitter: 56 assertions passed;
 - AafImporter golden tests: 65 assertions passed;
@@ -158,7 +158,7 @@ directory entries stopped after the initial essence skeleton, the directory
 chain continued into apparent media data, and it terminated with `FATSECT`
 instead of `ENDOFCHAIN`. The timeline metadata was never finalized, so the file
 cannot be repaired or converted to RPP. Do not commit or redistribute this
-private fixture.
+confidential fixture.
 
 Ask the editor to re-export using one of these workflows:
 
@@ -189,8 +189,7 @@ Verify all of the following:
 
 ## Distribution package
 
-The colleague handoff folder is `../AAF to RPP`. It contains the
-validated Windows x64 DLL, a short Russian installation guide, version/hash
-information, and the GPL license. The matching archive is
-`../AAF-to-RPP-Windows-x64-v0.3.7-premiere-stereo.5.zip`. Update the DLL,
-version, hash, guide, and archive together whenever a new build is released.
+Binary handoff packages are intentionally not committed. The validated Windows
+x64 package contains the DLL, a short Russian installation guide, version/hash
+information, and the GPL license. Keep the DLL, version, hash, guide, and source
+revision synchronized whenever a new package or GitHub Release is created.

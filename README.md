@@ -1,102 +1,114 @@
-# reAAF
+# reAAF Premiere Stereo
 
-REAPER extension that imports AAF (Advanced Authoring Format) session files as REAPER projects, relying on [LibAAF](https://github.com/agfline/LibAAF).
+[![Build](https://github.com/safroigor/reAAF-premiere-stereo/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/safroigor/reAAF-premiere-stereo/actions/workflows/build.yml)
+[![Tests](https://github.com/safroigor/reAAF-premiere-stereo/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/safroigor/reAAF-premiere-stereo/actions/workflows/tests.yml)
+[![License: GPL-3.0-or-later](https://img.shields.io/badge/license-GPL--3.0--or--later-blue.svg)](LICENSE)
 
-## Premiere breakout stereo fork
+An unofficial REAPER extension for opening AAF sessions, with dedicated support
+for embedded-audio AAF exports from Adobe Premiere Pro.
 
-This fork safely recombines adjacent, hard-panned `_L` / `_R` tracks created by
-Adobe Premiere's Breakout to Mono AAF export. Matching embedded mono WAVE
-essences are interleaved losslessly into stereo WAVE files while clip timing,
-source offsets, fades, gain and automation are preserved. Ambiguous or
-incompatible pairs remain as separate mono tracks.
+[Русское описание и инструкция](README.ru.md)
 
-The fork also emits Windows media paths and project timecode settings in a
-format accepted by REAPER's project parser.
+Current validated version: **0.3.7-premiere-stereo.5**
 
-Premiere stereo workflow and validation developed with Igor Safronov.
+## What this edition adds
 
-[![Build](https://github.com/smandrap/reAAF/actions/workflows/build.yml/badge.svg)](https://github.com/smandrap/reAAF/actions/workflows/build.yml)
-[![Tests](https://github.com/smandrap/reAAF/actions/workflows/tests.yml/badge.svg)](https://github.com/smandrap/reAAF/actions/workflows/tests.yml)
-[![CodeQL](https://github.com/smandrap/reAAF/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/smandrap/reAAF/actions/workflows/github-code-scanning/codeql)
+- opens AAF files directly through REAPER's **File → Open Project** dialog;
+- extracts audio embedded in the AAF beside the source file;
+- conservatively detects adjacent Premiere Breakout-to-Mono `_L` / `_R` tracks;
+- interleaves compatible mono WAVE essence into a lossless stereo WAVE file;
+- preserves clip timing, source offsets, gain, fades, automation, sample rate,
+  and bit depth;
+- supports Unicode paths and filenames on Windows, including Cyrillic folders;
+- leaves ambiguous or incompatible channel pairs as mono instead of changing
+  the mix silently.
 
----
+The importer is read-only: it imports AAF into REAPER but does not export AAF.
 
-> **reAAF is read-only** : it imports AAF files into REAPER, it does not add capability to export them. It is not meant as a replacement for [AATranslator](https://www.aatranslator.com.au/). If you need advanced AAF support, or support for a wide range of other formats, you should buy AATranslator.
+## Validated workflow
 
----
+The Premiere stereo workflow was developed and validated with Igor Safronov
+using real Adobe Premiere Pro embedded-audio AAF projects and REAPER 7.78 on
+Windows x64.
 
-## Features
+Version `0.3.7-premiere-stereo.5` was validated for:
 
-Most of what you expect from an AAF importer. In particular, most of what LibAAF exposes.
+- embedded 48 kHz / 24-bit audio;
+- Premiere `_L` / `_R` breakout-track reconstruction;
+- dual-mono clips inside an otherwise valid stereo pair;
+- Unicode and Cyrillic AAF directories;
+- item fades and project timecode;
+- safe fallback when a pair cannot be proven compatible.
 
----
+## Installation on Windows
 
-## AAF Format Support
+1. Close REAPER.
+2. Download the Windows x64 DLL or handoff package from the repository owner.
+3. Copy `reaper_reAAF.dll` to `%APPDATA%\REAPER\UserPlugins`.
+4. Restart REAPER.
+5. Select **File → Open Project** and choose an `.aaf` file.
 
-AAF has inherent limitations regardless of the importer.
-For more info, see [this document](docs/aaf-format-support.md).
+For embedded-audio AAF files, the importer creates `<AAF name>-media` beside
+the AAF. Keep that directory with the saved REAPER project.
 
-BEFORE YOU REPORT A BUG, **READ THE DOCUMENT.**
+## Important limitations
 
----
+- Only structurally verified `_L` / `_R` pairs are recombined.
+- AAF can only contain what the source application exported. Plug-ins, MIDI,
+  tempo maps, routing, and some automation are normally absent.
+- Adobe Premiere Pro on Windows can produce an incomplete embedded AAF near the
+  2 GiB limit. For large projects, prefer **Separate Audio**, trim the media
+  with reasonable handles, or split the sequence.
+- Marker support varies by exporter and is not guaranteed for Premiere AAF.
 
-## Usage
+See [AAF format support](docs/aaf-format-support.md) for general format limits
+and [Premiere Stereo maintenance notes](docs/PREMIERE_STEREO_FORK.md) for the
+implementation and validated cases.
 
-Drag/Drop AAF files in REAPER, or use File > Open dialog.
+## Building
 
----
+The dependencies are pinned Git submodules:
 
-## Install
-
-[Reapack](https://reapack.com) repository:
-```
-https://raw.githubusercontent.com/smandrap/reAAF/refs/heads/main/index.xml
-```
-
----
-
-## Dependencies
-
-All dependencies are git submodules — no package manager needed.
-
-- [justinfrankel/reaper-sdk](https://github.com/justinfrankel/reaper-sdk)
-- [justinfrankel/WDL](https://github.com/justinfrankel/WDL)
-- [agfline/LibAAF](https://github.com/agfline/LibAAF)
-
----
-
-## Build
+- [REAPER SDK](https://github.com/justinfrankel/reaper-sdk)
+- [WDL](https://github.com/justinfrankel/WDL)
+- [LibAAF](https://github.com/agfline/LibAAF)
+- [Catch2](https://github.com/catchorg/Catch2)
 
 ```bash
-git clone --recurse-submodules https://github.com/smandrap/reAAF.git
-cmake -B build -S reAAF -DCMAKE_BUILD_TYPE=Release
-cmake --build build --config Release
+git clone --recurse-submodules https://github.com/safroigor/reAAF-premiere-stereo.git
+cd reAAF-premiere-stereo
+cmake -B build -S . -DCMAKE_BUILD_TYPE=Release
+cmake --build build --config Release --target reaper_aaf
 ```
 
-- On macOS the plugin is copied automatically to `~/Library/Application Support/REAPER/UserPlugins/`.
-- On Windows it is copied to `%APPDATA%\REAPER\UserPlugins\`. Requires MSVC — MinGW is unsupported.
-- On Linux copy `reaper_reAAF.so` to `~/.config/REAPER/UserPlugins/` manually.
-
----
+Windows production builds must use Microsoft Visual C++. MinGW is not
+supported because the extension crosses REAPER's C++ plug-in ABI.
 
 ## Tests
 
-Tests do not require a REAPER installation.
-
 ```bash
-cmake -B build -S reAAF -DCMAKE_BUILD_TYPE=Debug
+cmake -B build -S . -DCMAKE_BUILD_TYPE=Debug
 cmake --build build --target all_tests
 ctest --test-dir build/tests --output-on-failure
 ```
 
----
+Private customer AAF files are never stored in this repository. The optional
+Premiere integration test is enabled only when a local fixture path is supplied.
 
-## Thanks
+## Credits
 
-This project wouldn't exist without [Adrien Gesta-Fline](https://github.com/agfline) and his work on [LibAAF](https://github.com/agfline/LibAAF). AAF is a genuinely painful format to deal with, and he did the hard work, I just made the REAPER bindings. If you find reAAF useful, go thank him, star his repo, and consider supporting his work.
+This edition is based on [reAAF](https://github.com/smandrap/reAAF), created by
+Federico Manuppella, and uses [LibAAF](https://github.com/agfline/LibAAF) by
+Adrien Gesta-Fline. Premiere stereo reconstruction, Unicode-path hardening, and
+workflow validation were developed with Igor Safronov.
 
----
+Adobe Premiere Pro and REAPER are trademarks of their respective owners. This
+project is independent and is not affiliated with or endorsed by Adobe or
+Cockos.
 
 ## License
 
-GPLv3+
+The project is distributed under the GNU General Public License v3.0 or later.
+See [LICENSE](LICENSE) and [third-party notices](THIRD_PARTY_NOTICES.md).
+Dependency licenses remain with their respective projects and pinned
+submodules.

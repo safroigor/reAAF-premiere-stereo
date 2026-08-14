@@ -1,6 +1,9 @@
 .idea/
-update_reapack_index.sh
+.vscode/
 CLAUDE.md
 .planning/
-build-mingw*/
+build*/
+cmake-build-*/
 artifacts/
+*-media/
+*.dmp
