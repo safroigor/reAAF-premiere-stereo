@@ -175,6 +175,19 @@ the embedded-audio fixture from the Cyrillic `Тест2` directory in REAPER 7.7
 the project opened without a crash, `_L`/`_R` tracks recombined as stereo, and
 item fades were correct. This validates the Unicode crash fix for distribution.
 
+Progress-window release `.6`:
+
+- release commit: `fb5ab3b Add AAF import progress window (#5)`
+- release tag: `v0.3.7-premiere-stereo.6`
+- Release run ID: `37792697405`
+- Windows DLL size: `483328` bytes
+- SHA-256: `CE627F49A485923E6C66DE7B6C1D63D379BA579D9FC66659A82ED656B8EFA534`
+
+The full build matrix and test workflow passed. `.6` adds the import progress
+window on top of the validated `.5` engine; the import and output paths are
+unchanged. A manual REAPER check with a private Premiere fixture is still
+recommended before the build is treated as fully field-validated.
+
 ## Premiere embedded AAF 2 GiB limit
 
 Premiere on Windows does not support embedded-audio AAF files larger than 2 GB.
