@@ -9,12 +9,15 @@ for embedded-audio AAF exports from Adobe Premiere Pro.
 
 [Русское описание и инструкция](README.ru.md)
 
-Current validated version: **0.3.7-premiere-stereo.5**
+Current version: **0.3.7-premiere-stereo.6**
 
 ## What this edition adds
 
 - opens AAF files directly through REAPER's **File → Open Project** dialog;
 - extracts audio embedded in the AAF beside the source file;
+- shows a progress window during long imports, with a determinate bar for
+  extraction and stereo recombination and an indeterminate phase for the
+  LibAAF load step;
 - conservatively detects adjacent Premiere Breakout-to-Mono `_L` / `_R` tracks;
 - interleaves compatible mono WAVE essence into a lossless stereo WAVE file;
 - preserves clip timing, source offsets, gain, fades, automation, sample rate,
@@ -40,11 +43,14 @@ Version `0.3.7-premiere-stereo.5` was validated for:
 - item fades and project timecode;
 - safe fallback when a pair cannot be proven compatible.
 
+Version `0.3.7-premiere-stereo.6` adds the import progress window on top of the
+validated `.5` engine (the import and output paths are unchanged).
+
 ## Installation on Windows
 
 1. Close REAPER.
 2. Download the Windows x64 DLL or Russian handoff package from
-   [release v0.3.7-premiere-stereo.5](https://github.com/safroigor/reAAF-premiere-stereo/releases/tag/v0.3.7-premiere-stereo.5).
+   [release v0.3.7-premiere-stereo.6](https://github.com/safroigor/reAAF-premiere-stereo/releases/tag/v0.3.7-premiere-stereo.6).
 3. Copy `reaper_reAAF.dll` to `%APPDATA%\REAPER\UserPlugins`.
 4. Restart REAPER.
 5. Select **File → Open Project** and choose an `.aaf` file.

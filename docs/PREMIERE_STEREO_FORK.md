@@ -8,7 +8,10 @@ were developed with Igor Safronov.
 
 Repository: `https://github.com/safroigor/reAAF-premiere-stereo`
 
-Current validated version: `0.3.7-premiere-stereo.5`
+Current version: `0.3.7-premiere-stereo.6`
+
+The validated engine remains `0.3.7-premiere-stereo.5`; `.6` only adds the import
+progress window and does not change import or output behaviour.
 
 Feature branch at initial validation: `agent/premiere-stereo-import`
 
@@ -78,6 +81,32 @@ filesystem paths, including names such as `Landström` and Cyrillic folders.
 - emit the complete `TIMEMODE 1 5 -1 <fps> <drop-frame> 0 -1` record.
 
 The extracted media directory is produced beside the AAF as `<AAF name>-media`.
+
+## Import progress window
+
+Version `.6` adds a modeless, non-cancellable progress window that is shown
+before `aafi_load_file()` runs, so the user gets feedback during the previously
+silent phases:
+
+- `Reading AAF...` — indeterminate phase covering LibAAF's opaque load step,
+  where no sub-progress is exposed;
+- `Extracting <name>` — determinate, one step per embedded essence file;
+- `Recombining <name>` — determinate, one step per confirmed `_L`/`_R` pair;
+- `Writing REAPER project...` — indeterminate final phase.
+
+`src/ProgressReporter.h` defines the `IProgressReporter` interface; the importer
+and `StereoRecombiner` call it only when a reporter is supplied, so headless
+tests stay UI-free. `src/ProgressDialog.{h,cpp}` implements it on top of SWELL
+for Windows, macOS, and Linux. While the main thread is busy the dialog pumps
+only its own messages (Windows) or drains the SWELL queue (macOS/Linux), so it
+never re-enters REAPER's import callback.
+
+Known limits:
+
+- `aafi_load_file()` and a single `aafi_extractAudioEssenceFile()` call cannot
+  report sub-progress without patching LibAAF, so the bar is per phase / per
+  file rather than continuous;
+- the import remains synchronous and cannot be cancelled.
 
 ## Tests
 

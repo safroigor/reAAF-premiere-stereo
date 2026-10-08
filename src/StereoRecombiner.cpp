@@ -10,6 +10,7 @@
 #include "StereoRecombiner.h"
 
 #include "LogBuffer.h"
+#include "ProgressReporter.h"
 #include "helpers.h"
 
 #include <algorithm>
@@ -404,10 +405,17 @@ std::string pairKey(const std::string &left, const std::string &right) {
 } // namespace
 
 void recombinePremiereBreakoutStereo(std::vector<AudioTrackData> &tracks,
-                                     const std::string &outputDir, LogBuffer &logBuffer) {
+                                     const std::string &outputDir, LogBuffer &logBuffer,
+                                     IProgressReporter *progress) {
     std::vector<AudioTrackData> result;
     result.reserve(tracks.size());
     std::unordered_map<std::string, std::string> generatedSources;
+
+    if ( progress ) {
+        progress->beginPhase("Recombining stereo pairs...");
+        progress->setRange(static_cast<unsigned>(tracks.size()));
+    }
+    unsigned processed = 0;
 
     for ( size_t i = 0; i < tracks.size(); ) {
         const AudioTrackData *left = nullptr;
@@ -424,6 +432,8 @@ void recombinePremiereBreakoutStereo(std::vector<AudioTrackData> &tracks,
         if ( !left || !right || !tracksMatch(*left, *right) ) {
             result.push_back(std::move(tracks[i]));
             ++i;
+            if ( progress )
+                progress->advance(++processed, nullptr);
             continue;
         }
 
@@ -433,6 +443,8 @@ void recombinePremiereBreakoutStereo(std::vector<AudioTrackData> &tracks,
                            left->name.c_str(), right->name.c_str());
             result.push_back(std::move(tracks[i]));
             ++i;
+            if ( progress )
+                progress->advance(++processed, nullptr);
             continue;
         }
 
@@ -472,11 +484,19 @@ void recombinePremiereBreakoutStereo(std::vector<AudioTrackData> &tracks,
         if ( success ) {
             logBuffer.logf(LogEntry::INFO, "Recombined Premiere breakout tracks '%s' + '%s' as stereo",
                            left->name.c_str(), right->name.c_str());
+            const std::string mergedName = merged.name;
             result.push_back(std::move(merged));
             i += 2;
+            processed += 2;
+            if ( progress ) {
+                const std::string label = "Recombining " + mergedName;
+                progress->advance(processed, label.c_str());
+            }
         } else {
             result.push_back(std::move(tracks[i]));
             ++i;
+            if ( progress )
+                progress->advance(++processed, nullptr);
         }
     }
     tracks = std::move(result);

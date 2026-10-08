@@ -16,10 +16,13 @@
 #include <vector>
 
 class LogBuffer;
+struct IProgressReporter;
 
 // Recombines the adjacent, hard-panned _L/_R tracks produced by Premiere's
 // "Breakout to Mono" export. Ambiguous or unsupported pairs are left intact.
+// progress may be null; when supplied it reports per-track recombine progress.
 void recombinePremiereBreakoutStereo(std::vector<AudioTrackData> &tracks,
-                                     const std::string &outputDir, LogBuffer &logBuffer);
+                                     const std::string &outputDir, LogBuffer &logBuffer,
+                                     IProgressReporter *progress = nullptr);
 
 #endif // REAPER_AAF_STEREORECOMBINER_H

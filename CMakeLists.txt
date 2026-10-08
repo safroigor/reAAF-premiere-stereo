@@ -118,6 +118,7 @@ add_library(reaper_aaf MODULE
         src/AafEmitter.cpp
         src/FadeResolver.cpp
         src/StereoRecombiner.cpp
+        src/ProgressDialog.cpp
         src/LogBuffer.cpp
         src/PrefsPage.cpp
         src/LogDialog.cpp
