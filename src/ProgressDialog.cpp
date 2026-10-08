@@ -7,12 +7,11 @@
  * (at your option) any later version.
  */
 
+#include <cstdint>
+
 #include "ProgressDialog.h"
 
 #include "resource.h"
-
-#include <algorithm>
-#include <cstdint>
 
 extern REAPER_PLUGIN_HINSTANCE g_hInst;
 
@@ -77,10 +76,12 @@ void ProgressDialog::advance(const unsigned done, const char *text) {
     m_done = done;
     if ( text )
         setStatus(text);
-    const unsigned position =
-        m_total > 0 ? std::min(kBarMaximum, static_cast<unsigned>(
-                                                static_cast<uint64_t>(done) * kBarMaximum / m_total))
-                    : 0;
+    unsigned position = 0;
+    if ( m_total > 0 ) {
+        // SWELL defines min/max macros, so clamp without std::min.
+        const uint64_t scaled = static_cast<uint64_t>(done) * kBarMaximum / m_total;
+        position = scaled > kBarMaximum ? kBarMaximum : static_cast<unsigned>(scaled);
+    }
     setBar(position);
     pump();
 }
@@ -105,7 +106,8 @@ void ProgressDialog::setBar(const unsigned position) const {
     const HWND bar = GetDlgItem(m_hwnd, IDC_PROGRESS_BAR);
     if ( !bar )
         return;
-    SendMessage(bar, PBM_SETPOS, static_cast<WPARAM>(std::min(position, kBarMaximum)), 0);
+    const unsigned clamped = position > kBarMaximum ? kBarMaximum : position;
+    SendMessage(bar, PBM_SETPOS, static_cast<WPARAM>(clamped), 0);
 }
 
 void ProgressDialog::pump() const {
