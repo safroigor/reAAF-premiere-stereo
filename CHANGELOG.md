@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.3.7-premiere-stereo.6] - 2026-10-08
+
+### Added
+
+- show a small progress window during AAF import so that long imports no longer
+  look like a freeze;
+- indeterminate "Reading AAF..." phase covering LibAAF's opaque load step;
+- determinate progress for embedded-audio extraction and for Premiere breakout
+  stereo recombination;
+- cross-platform progress dialog built on SWELL (Windows, macOS, Linux).
+
+### Notes
+
+- the import stays synchronous and cannot be cancelled; the window only provides
+  feedback during long imports;
+- the progress bar cannot show sub-progress inside a single LibAAF.parse or
+  essence file, so those steps report per file / per phase.
+
 ## [0.3.7-premiere-stereo.5] - 2026-08-14
 
 ### Premiere stereo workflow

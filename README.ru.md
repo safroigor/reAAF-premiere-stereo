@@ -3,12 +3,14 @@
 Неофициальное расширение REAPER для открытия AAF-проектов, в том числе AAF из
 Adobe Premiere Pro со встроенным аудиоматериалом.
 
-Актуальная проверенная версия: **0.3.7-premiere-stereo.5**
+Актуальная версия: **0.3.7-premiere-stereo.6**
 
 ## Возможности
 
 - открытие AAF через **File → Open Project** в REAPER;
 - автоматическое извлечение встроенного аудио;
+- окно прогресса при длительном импорте: полоса для извлечения и сборки стерео
+  и неопределённый индикатор на этапе разбора AAF в LibAAF;
 - восстановление подтверждённых пар Premiere Breakout-to-Mono `_L` / `_R` в
   стерео без перекодирования;
 - сохранение тайминга, исходных смещений, уровня клипов, фейдов, автоматизации,
@@ -20,7 +22,7 @@ Adobe Premiere Pro со встроенным аудиоматериалом.
 
 1. Закройте REAPER.
 2. Скачайте Windows DLL или готовый русскоязычный комплект из
-   [релиза v0.3.7-premiere-stereo.5](https://github.com/safroigor/reAAF-premiere-stereo/releases/tag/v0.3.7-premiere-stereo.5).
+   [релиза v0.3.7-premiere-stereo.6](https://github.com/safroigor/reAAF-premiere-stereo/releases/tag/v0.3.7-premiere-stereo.6).
 3. Скопируйте `reaper_reAAF.dll` в `%APPDATA%\REAPER\UserPlugins`.
 4. Запустите REAPER заново.
 5. Выберите **File → Open Project** и откройте файл `.aaf`.

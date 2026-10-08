@@ -20,6 +20,7 @@
 #include "AafiHandle.h"
 #include "FadeResolver.h"
 #include "LogBuffer.h"
+#include "ProgressReporter.h"
 #include "StereoRecombiner.h"
 #include "helpers.h"
 
@@ -107,9 +108,10 @@ void AafImporter::libaafLogCallback(aafLog *, void *, const int lib, const int t
 }
 
 
-AafImporter::AafImporter(IRppSink *sink, const char *filepath, LogBuffer &logBuffer)
+AafImporter::AafImporter(IRppSink *sink, const char *filepath, LogBuffer &logBuffer,
+                         IProgressReporter *progress)
     : m_writer(sink), m_aafi(AafiHandle(aafi_alloc(nullptr))), m_filePath(filepath),
-      m_extractDir(buildExtractDir(filepath)), m_logBuffer(logBuffer) {}
+      m_extractDir(buildExtractDir(filepath)), m_logBuffer(logBuffer), m_progress(progress) {}
 
 int AafImporter::run() {
     if ( !m_aafi ) {
@@ -120,15 +122,29 @@ int AafImporter::run() {
     aafi_set_debug(m_aafi.get(), VERB_WARNING, 0, nullptr, &AafImporter::libaafLogCallback, this);
     aafi_set_option_int(m_aafi.get(), "protools", PROTOOLS_ALL_OPT);
 
+    // LibAAF's parse step is opaque: no sub-progress is available, so the
+    // window is shown here (before the potentially slow call) as an
+    // indeterminate phase. This is the main anti-"frozen UI" feedback.
+    if ( m_progress )
+        m_progress->beginPhase("Reading AAF...");
+
     setMediaLocation();
-    if ( !loadFile() )
+    if ( !loadFile() ) {
+        if ( m_progress )
+            m_progress->finish();
         return -1;
+    }
 
     const CompositionData comp = extractComposition();
+    if ( m_progress )
+        m_progress->beginPhase("Writing REAPER project...");
     auto proj =
         m_writer.project(comp.tcOffset, comp.maxProjLen, comp.fps, comp.isDrop, comp.samplerate);
     const AafEmitter emitter(m_writer);
     emitter.emit(comp);
+
+    if ( m_progress )
+        m_progress->finish();
     return 0;
 }
 
@@ -182,13 +198,18 @@ CompositionData AafImporter::extractComposition() {
     }
 
     const aafiAudioTrack *track = nullptr;
+    if ( m_progress ) {
+        m_progress->beginPhase("Extracting embedded audio...");
+        m_progress->setRange(countEmbeddedEssences());
+    }
+    m_extractDone = 0;
     AAFI_foreachAudioTrack(m_aafi, track) {
         auto subtracks = extractAudioTrack(track);
         for ( auto &st : subtracks )
             comp.audioTracks.push_back(std::move(st));
     }
 
-    recombinePremiereBreakoutStereo(comp.audioTracks, m_extractDir, m_logBuffer);
+    recombinePremiereBreakoutStereo(comp.audioTracks, m_extractDir, m_logBuffer, m_progress);
 
     return comp;
 }
@@ -367,6 +388,16 @@ VideoClipData AafImporter::extractVideoClip(const aafiVideoClip *clip,
     return vc;
 }
 
+unsigned AafImporter::countEmbeddedEssences() const {
+    unsigned count = 0;
+    const aafiAudioEssenceFile *ess = nullptr;
+    AAFI_foreachAudioEssenceFile(m_aafi.get(), ess) {
+        if ( ess->is_embedded )
+            ++count;
+    }
+    return count;
+}
+
 bool AafImporter::extractEmbeddedEssence(aafiAudioEssenceFile *ess) {
     if ( !m_extractDirCreated ) {
         if ( !ensure_dir(m_extractDir) ) {
@@ -388,6 +419,11 @@ bool AafImporter::extractEmbeddedEssence(aafiAudioEssenceFile *ess) {
         return false;
     }
     m_logBuffer.logf(LogEntry::INFO, "Extracted '%s'", ess->unique_name);
+    if ( m_progress ) {
+        const std::string label =
+            std::string("Extracting ") + (ess->unique_name ? ess->unique_name : "audio");
+        m_progress->advance(++m_extractDone, label.c_str());
+    }
     return true;
 }
 

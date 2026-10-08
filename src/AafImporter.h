@@ -41,10 +41,12 @@ struct aafiVideoEssence;
 struct aafiTimelineItem;
 struct aafiAudioEssencePointer;
 struct aafiAudioEssenceFile;
+struct IProgressReporter;
 
 class AafImporter {
   public:
-    AafImporter(IRppSink *sink, const char *filepath, LogBuffer &logBuffer);
+    AafImporter(IRppSink *sink, const char *filepath, LogBuffer &logBuffer,
+                IProgressReporter *progress = nullptr);
 
     int run();
 
@@ -55,6 +57,8 @@ class AafImporter {
     std::string m_extractDir;
     bool m_extractDirCreated = false;
     LogBuffer &m_logBuffer;
+    IProgressReporter *m_progress = nullptr;
+    unsigned m_extractDone = 0;
 
     static void libaafLogCallback(aafLog *log, void *userData, int lib, int type,
                                   const char *srcFile, const char *srcFunc, int line,
@@ -63,6 +67,10 @@ class AafImporter {
     void setMediaLocation() const;
 
     [[nodiscard]] bool loadFile() const;
+
+    // Count embedded essence files that still need extraction; used to size the
+    // determinate progress range.
+    [[nodiscard]] unsigned countEmbeddedEssences() const;
 
     // Extraction phase — reads LibAAF structs, returns data model
     [[nodiscard]] CompositionData extractComposition();

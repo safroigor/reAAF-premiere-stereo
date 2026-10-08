@@ -9,6 +9,7 @@
 
 #include "AafData.h"
 #include "LogBuffer.h"
+#include "ProgressReporter.h"
 #include "StereoRecombiner.h"
 
 #include <array>
@@ -150,6 +151,25 @@ struct TempDir {
     }
 };
 
+struct RecordingReporter final : IProgressReporter {
+    int beginPhases = 0;
+    int rangeSets = 0;
+    unsigned lastTotal = 0;
+    std::vector<unsigned> advances;
+    bool finished = false;
+
+    void beginPhase(const char *) override { ++beginPhases; }
+
+    void setRange(const unsigned total) override {
+        ++rangeSets;
+        lastTotal = total;
+    }
+
+    void advance(const unsigned done, const char *) override { advances.push_back(done); }
+
+    void finish() override { finished = true; }
+};
+
 } // namespace
 
 TEST_CASE("Premiere breakout pair is recombined without changing sample bytes") {
@@ -266,4 +286,25 @@ TEST_CASE("shared mono clips inside a breakout pair become dual mono stereo") {
     CHECK(readWaveSamples(tracks[0].clips[0].source.filePath, channels) ==
           std::vector<int16_t>{7, 7, -8, -8});
     CHECK(channels == 2);
+}
+
+TEST_CASE("recombiner reports progress for matched breakout pairs") {
+    TempDir temp;
+    const auto leftPath = temp.path / "source_L.wav";
+    const auto rightPath = temp.path / "source_R.wav";
+    writeMono16Wave(leftPath, {1, 2});
+    writeMono16Wave(rightPath, {3, 4});
+    std::vector<AudioTrackData> tracks{makeTrack("MX_L", -1.0, leftPath.string()),
+                                       makeTrack("MX_R", 1.0, rightPath.string())};
+    LogBuffer log;
+    RecordingReporter reporter;
+
+    recombinePremiereBreakoutStereo(tracks, temp.path.string(), log, &reporter);
+
+    REQUIRE(tracks.size() == 1);
+    CHECK(reporter.beginPhases == 1);
+    CHECK(reporter.rangeSets == 1);
+    CHECK(reporter.lastTotal == 2);
+    REQUIRE_FALSE(reporter.advances.empty());
+    CHECK(reporter.advances.back() == 2);
 }

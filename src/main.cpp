@@ -19,6 +19,7 @@
 #include "LogBuffer.h"
 #include "LogDialog.h"
 #include "PrefsPage.h"
+#include "ProgressDialog.h"
 #include "ReaperSink.h"
 #include "defines.h"
 #include "helpers.h"
@@ -78,11 +79,14 @@ int aaf_ImportProject(const char *fn, ProjectStateContext *ctx) {
     const bool isDebug = PrefsPage::getShowDebug();
 
     std::unique_ptr<LogBuffer> logBuffer;
-    int ok;
+    int ok = -1;
     try {
         logBuffer = std::make_unique<LogBuffer>(isDebug ? LogEntry::DEBUG : LogEntry::INFO);
         ReaperSink sink(ctx);
-        ok = AafImporter(&sink, fn, *logBuffer).run();
+        // Shown before AafImporter::run(), so the window is visible during the
+        // opaque LibAAF load step as well as the extraction/recombine phases.
+        ProgressDialog progress(GetMainHwnd());
+        ok = AafImporter(&sink, fn, *logBuffer, &progress).run();
     } catch ( const std::bad_alloc & ) {
         rlog("reAAF ERROR: Out of memory importing AAF file!!\n");
         return -1;
